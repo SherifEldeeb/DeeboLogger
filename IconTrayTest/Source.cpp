@@ -29,18 +29,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam )
 			SelectObject(hMemDC, hBitmapS);
 			BitBlt(hdc,10,10,121,106,hMemDC,0,0,SRCCOPY);
 			DeleteDC(hMemDC);
-			// draw a circle and a 2 squares
-			//Ellipse( hdc, 20, 20, 160, 160 );
-			//Rectangle( hdc, 50, 50, 90, 90 );
-			//Rectangle( hdc, 100, 50, 140, 90 );
-
 			EndPaint( hwnd, &ps );
 		}
 		return 0;
 		break;
-
-
-
 
 	case WM_DESTROY:
 		PostQuitMessage( 0 ) ;
@@ -65,19 +57,12 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLin
 	wcx.lpszMenuName = TEXT("Menu");    // no menu - ignore
 	wcx.style = CS_HREDRAW | CS_VREDRAW; // Redraw the window
 	wcx.hIconSm = LoadIcon( GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
-
 	//
 	RegisterClassEx(&wcx);
 	//
 	HWND hwnd = CreateWindow(TEXT("UniLogger"),TEXT("UniLogger!"),
-		(WS_OVERLAPPED	| \
-		WS_CAPTION		| \
-		WS_SYSMENU		| \
-		WS_MINIMIZEBOX),
-		CW_USEDEFAULT, CW_USEDEFAULT,                 // x, y start coordinates of window
-		300, 170,               // width, height of window
-		NULL, NULL,             // nothing and nothing (ignore to start out)
-		hInstance, NULL );      // hInstance -- (see glossary), nothing
+		(WS_OVERLAPPED	| WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX),
+		CW_USEDEFAULT, CW_USEDEFAULT, 300, 170, NULL, NULL, hInstance, NULL );
 	ShowWindow(hwnd, iCmdShow);
 	UpdateWindow(hwnd);
 	MSG msg;
