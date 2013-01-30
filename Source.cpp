@@ -1,35 +1,6 @@
 #include <Windows.h>
 #include <stdio.h>
 
-//bobobobo's weblog http://bobobobo.wordpress.com 
-#define ID_TRAY_APP_ICON                5000
-#define ID_TRAY_EXIT_CONTEXT_MENU_ITEM  3000
-#define WM_TRAYICON ( WM_USER + 1 )
-
-UINT WM_TASKBARCREATED = 0 ;
-HWND g_hwnd ;
-HMENU g_menu ;
-NOTIFYICONDATA g_notifyIconData ;
-LRESULT CALLBACK WndProc (HWND, UINT, WPARAM, LPARAM);
-//
-void InitNotifyIconData()
-{
-	memset( &g_notifyIconData, 0, sizeof( NOTIFYICONDATA ) ) ;
-	g_notifyIconData.cbSize = sizeof(NOTIFYICONDATA);
-
-	g_notifyIconData.hWnd = g_hwnd;
-	g_notifyIconData.uID = ID_TRAY_APP_ICON;
-
-	g_notifyIconData.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
-	g_notifyIconData.uCallbackMessage = WM_TRAYICON;
-	g_notifyIconData.hIcon = (HICON)LoadImage( NULL, TEXT("green_man.ico"), IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
-	wcscpy(g_notifyIconData.szTip, TEXT("Green man.. here's looking at ya!"));
-}
-//
-
-//
-
-
 TCHAR	window_text[1024] = {0};
 TCHAR	old_window_text[1024] = {0};
 HWND	hWindowHandle;
@@ -277,115 +248,9 @@ DWORD WINAPI logger(void)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	//tray icon preparation
-	//http://bobobobo.wordpress.com    
-	TCHAR className[] = TEXT( "tray icon class" );
-	WM_TASKBARCREATED = RegisterWindowMessage(L"TaskbarCreated") ;
-	WNDCLASSEX wnd = {0};
-
-	wnd.hInstance = hInstance;
-	wnd.lpszClassName = className;
-	wnd.lpfnWndProc = WndProc;
-	wnd.style = CS_HREDRAW | CS_VREDRAW ;
-	wnd.cbSize = sizeof (WNDCLASSEX);
-
-	wnd.hIcon = LoadIcon (NULL, IDI_APPLICATION);
-	wnd.hIconSm = LoadIcon (NULL, IDI_APPLICATION);
-	wnd.hCursor = LoadCursor (NULL, IDC_ARROW);
-	wnd.hbrBackground = (HBRUSH)COLOR_APPWORKSPACE ;
-
-	if (!RegisterClassEx(&wnd))
-	{
-		FatalAppExit( 0, TEXT("Couldn't register window class!") );
-	}
-	g_hwnd = CreateWindowEx(0, className, TEXT("Using the system tray"), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 400, 400, NULL, NULL, hInstance, NULL);
-
-	CreateWindow(TEXT("static"), TEXT("right click the system tray icon to close"), WS_CHILD | WS_VISIBLE | SS_CENTER, 0, 0, 400, 400, g_hwnd, 0, hInstance, NULL);
-	InitNotifyIconData();
-	
-	ShowWindow(g_hwnd, nCmdShow);
-	
-	MSG msg;
-	while (GetMessage (&msg, NULL, 0, 0))
-	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-	
-	if( !IsWindowVisible( g_hwnd ) )
-	{
-		Shell_NotifyIcon(NIM_DELETE, &g_notifyIconData);
-	}
-	///
 	srand(GetTickCount());
 	DWORD nThreadId = 0;
 	HANDLE hHandle = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)logger, NULL, NULL, &nThreadId);
 	WaitForSingleObject(hHandle, INFINITE);
 	return 0;
 } 
-
-LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message)
-	{
-	case WM_CREATE:
-		g_menu = CreatePopupMenu();
-		AppendMenu(g_menu, MF_STRING, ID_TRAY_EXIT_CONTEXT_MENU_ITEM,  TEXT( "Exit" ) );
-		break;
-	case WM_TRAYICON:
-		{
-			printf( "Tray icon notification, from %d\n", wParam ) ;
-
-			switch(wParam)
-			{
-			case ID_TRAY_APP_ICON:
-				printf( "Its the ID_TRAY_APP_ICON.. one app can have several tray icons, ya know..\n" ) ;
-				break;
-			}
-			if (lParam == WM_LBUTTONUP)
-			{
-				printf( "You have restored me!\n" ) ;
-			}
-			else if (lParam == WM_RBUTTONDOWN) // I'm using WM_RBUTTONDOWN here because
-			{
-				printf( "Mmm.  Let's get contextual.  I'm showing you my context menu.\n" ) ;
-				POINT curPoint ;
-				GetCursorPos( &curPoint ) ;
-				SetForegroundWindow(hwnd); 
-				printf("calling track\n");
-				UINT clicked = TrackPopupMenu(g_menu,TPM_RETURNCMD | TPM_NONOTIFY, curPoint.x, curPoint.y, 0, hwnd, NULL);
-				printf("returned from call to track\n");
-
-				//SendMessage(hwnd, WM_NULL, 0, 0); // send benign message to window to make sure the menu goes away.
-				if (clicked == ID_TRAY_EXIT_CONTEXT_MENU_ITEM)
-				{
-					printf("I have posted the quit message, biatch\n");
-					PostQuitMessage( 0 ) ;
-				}
-			}
-		}
-		break;
-	case WM_NCHITTEST:
-		{
-			// http://www.catch22.net/tuts/tips
-			// this tests if you're on the non client area hit test
-			UINT uHitTest = DefWindowProc(hwnd, WM_NCHITTEST, wParam, lParam);
-			if(uHitTest == HTCLIENT)
-				return HTCAPTION;
-			else
-				return uHitTest;
-		}
-
-	case WM_CLOSE:
-		printf( "Got an actual WM_CLOSE Message!  Woo hoo!\n" ) ;
-		return 0;
-		break;
-
-	case WM_DESTROY:
-		printf( "DESTROY!!\n" ) ;
-		PostQuitMessage (0);
-		break;
-	}
-	return DefWindowProc( hwnd, message, wParam, lParam ) ;
-}
-
