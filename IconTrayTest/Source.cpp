@@ -8,10 +8,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam )
 	switch(message)
 	{
 	case WM_LBUTTONDOWN:
-		if (nBitmap == IDB_BITMAP1)
-			nBitmap = IDB_BITMAP2;
-		else if (nBitmap == IDB_BITMAP2)
-			nBitmap = IDB_BITMAP1;
+
+		if (nBitmap == IDB_BITMAP1) nBitmap = IDB_BITMAP2;
+		else if (nBitmap == IDB_BITMAP2) nBitmap = IDB_BITMAP1;
 		RedrawWindow(hwnd,NULL,NULL,RDW_INVALIDATE);
 		return 0;
 		break;
