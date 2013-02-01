@@ -250,7 +250,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 {
 	srand(GetTickCount());
 	DWORD nThreadId = 0;
-	HANDLE hHandle = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)logger, NULL, NULL, &nThreadId);
-	WaitForSingleObject(hHandle, INFINITE);
+	HANDLE hThreadHandle = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)logger, NULL, NULL, &nThreadId);
+	WaitForSingleObject(hThreadHandle, INFINITE);
 	return 0;
 } 
