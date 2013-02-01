@@ -2,34 +2,50 @@
 #include "resource.h"
 
 int nBitmap = IDB_BITMAP2;
+TCHAR *winText = L"Not Logging...\n\nClick to (start/stop)\n\nhttp://eldeeb.net";
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam ) 
 {
 	switch(message)
 	{
-	case WM_LBUTTONDOWN:
-
-		if (nBitmap == IDB_BITMAP1) nBitmap = IDB_BITMAP2;
-		else if (nBitmap == IDB_BITMAP2) nBitmap = IDB_BITMAP1;
-		RedrawWindow(hwnd,NULL,NULL,RDW_INVALIDATE);
-		return 0;
-		break;
-
 	case WM_PAINT:
 		{
 			HDC hdc;
 			HDC hMemDC;
 			PAINTSTRUCT ps;
 			HBITMAP hBitmapS;
-
+			RECT rect;
+			
 			hdc = BeginPaint( hwnd, &ps );
+			//image
 			hBitmapS = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(nBitmap)); 
 			hMemDC = CreateCompatibleDC(hdc);
 			SelectObject(hMemDC, hBitmapS);
 			BitBlt(hdc,10,10,121,106,hMemDC,0,0,SRCCOPY);
+			//text
+			GetClientRect(hwnd, &rect);
+			rect.left = (rect.right / 2) - 40;
+			rect.top = rect.top + 10;
+			DrawText(hdc, winText, -1, &rect, DT_CENTER |  DT_END_ELLIPSIS  );
+
+			//cleanuop
 			DeleteDC(hMemDC);
 			EndPaint( hwnd, &ps );
 		}
+		return 0;
+		break;
+
+	case WM_LBUTTONDOWN:
+		if (nBitmap == IDB_BITMAP1) {
+			nBitmap = IDB_BITMAP2;
+			winText = L"Not Logging...\n\nClick to (start/stop)\n\nhttp://eldeeb.net";
+		}
+		else if (nBitmap == IDB_BITMAP2) {
+			nBitmap = IDB_BITMAP1;
+			winText = L"Logging!\n\nClick to (start/stop)\n\nhttp://eldeeb.net";
+		}
+		
+		InvalidateRect(hwnd,NULL, true);
 		return 0;
 		break;
 
@@ -61,7 +77,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLin
 	//
 	HWND hwnd = CreateWindow(TEXT("UniLogger"),TEXT("UniLogger!"),
 		(WS_OVERLAPPED	| WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX),
-		CW_USEDEFAULT, CW_USEDEFAULT, 300, 170, NULL, NULL, hInstance, NULL );
+		CW_USEDEFAULT, CW_USEDEFAULT, 350, 170, NULL, NULL, hInstance, NULL );
 	ShowWindow(hwnd, iCmdShow);
 	UpdateWindow(hwnd);
 	MSG msg;
